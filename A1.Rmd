@@ -1,0 +1,162 @@
+---
+title: "STATS 782 Assignment 1; University of Auckland"
+date: 'Due Date: 10:00 NZ Time, Monday 20 March 2023'
+output:
+  html_document: default
+  pdf_document: default
+---
+
+### "Junyi Yang", "223831196"
+
+I have read the declaration on the cover sheet and confirm my agreement with it.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE) ## makes sure the code is shown
+```
+
+
+## Question 1
+
+### a)
+
+```{r}
+seq(0,6,by=1.5)
+```
+
+### b)
+
+```{r}
+cumsum(seq(2,20,by=2))
+```
+
+### c)
+
+```{r}
+abs(3:-3)
+```
+
+### d)
+
+```{r}
+rep(seq(40,0,by=-10),times = 4) + rep(0:4,each=4)
+```
+
+### e)
+
+```{r}
+paste(LETTERS[7:1],7:1,'-',letters[1:7],1:7,sep = '')
+```
+
+
+
+## Question 2
+
+```{r}
+## define f here
+f = function (x) {
+  # max is the lenght for the longest one
+  if (length(x)<=1) {
+    return(numeric(0))
+  }
+  for (i in (1:length(x))){
+    
+  }
+}
+```
+
+```{r}
+## uncomment the tests when you are done
+# x <- c(-1, 2, 7, 5.5, 5, 4, 4, 3, 2, -4, -4.1, -5, 8)
+# f(x)
+
+# set.seed(782)
+# f(0)
+# f(3:1)
+# f(1:3)
+# f(c(Inf, 0, -Inf, pi, 3))
+# f(round(runif(100) * 100, 1))
+```
+
+
+## Question 3
+
+### a)
+
+```{r}
+
+```
+
+### b)
+
+```{r}
+
+```
+
+### c)
+
+```{r}
+
+```
+
+### d)
+
+```{r}
+
+```
+
+### e)
+
+```{r}
+
+```
+
+
+## Question 4
+
+### a)
+
+```{r}
+
+```
+
+### b)
+
+```{r}
+## define f here
+
+# f(1000)
+```
+
+### c)
+
+```{r}
+## define approx here
+
+```
+(explain here or in comments)
+
+```{r}
+# approx(0.00001)
+```
+
+### d)
+
+```{r}
+## define sr here
+
+# sr(n = 4)
+# compare and explain
+```
+
+### e)
+
+```{r}
+
+```
+
+### f)
+
+```{r}
+
+```
