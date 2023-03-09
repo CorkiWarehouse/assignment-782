@@ -141,25 +141,52 @@ f(round(runif(100) * 100, 1))
 ### a)
 
 ```{r}
+# at first we need to do the preparation for the data 
+library(MASS)
 
+state <- rownames(road) # name of the US state
+deaths <- road$deaths # number of deaths
+drivers <- road$drivers # number of drivers (in 10,000s)
+temp <- road$temp # average daily max temperature in January
 ```
+
+#### We need a new chunk to create the main part:
+
+```{r}
+max(deaths)
+```
+
 
 ### b)
 
 ```{r}
-
+mean(deaths)
 ```
 
 ### c)
 
 ```{r}
+# to get this result we need to get
+# the fatality rate = number of deaths / number of drivers
 
+fatality_rate = deaths / drivers
+
+# then get the index for the max
+index = which.max(fatality_rate)
+
+# then we get the name 
+state[index]
 ```
 
 ### d)
 
 ```{r}
+# at first we need to get he average number of deaths
+avg = mean(deaths)
 
+# then we get the close rank for the deaths 
+close = state[which(order(abs(deaths-avg))<4)]
+close
 ```
 
 ### e)
