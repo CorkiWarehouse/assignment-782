@@ -212,7 +212,12 @@ state[over_drivers_index][order(fatality_rate_per)][1:3]
 ### a)
 
 ```{r}
-
+# for we only need the first 7 terms of the series
+# our arctan function will be 
+arctan = function(x) {
+  num = 2*seq(1,7)-1
+  arctan = 
+}
 ```
 
 ### b)
