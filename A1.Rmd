@@ -184,14 +184,25 @@ state[index]
 # at first we need to get he average number of deaths
 avg = mean(deaths)
 
-# then we get the close rank for the deaths 
-close = state[which(order(abs(deaths-avg))<4)]
+# then we get the close rank for the deaths R
+close = state[order(abs(deaths-avg))][1:3]
 close
 ```
 
 ### e)
 
 ```{r}
+# if we want the at least 100,000 drivers
+# we need to change get the drivers' items
+
+over_drivers_index = which((drivers / 10)>=1)
+
+# then we calculate the highest fatality rates
+fatality_rate_per = deaths[over_drivers_index] / (drivers*100000)[over_drivers_index]
+
+# then we get 3 the highest rates
+state[over_drivers_index][order(fatality_rate_per)][1:3]
+
 
 ```
 
