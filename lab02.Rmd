@@ -1,0 +1,164 @@
+---
+title: "lab02"
+author: "Junyi"
+date: "2023-03-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+ library(MASS)
+ make <- as.character(Cars93$Make) # car make and model
+ weight <- Cars93$Weight           # weight (in lb)
+ hp <- Cars93$Horsepower           # max. horsepower
+ price <- Cars93$Price             # price in US$1,000
+```
+
+```{r}
+max(weight)
+```
+
+```{r}
+make[which.max(weight)]
+```
+
+```{r}
+make[order(abs(price-mean(price)))][1]
+```
+
+
+```{r}
+mean(price[which(weight>2500 & hp >=100)])*1000
+```
+
+```{r}
+make[order(hp)][1:5]
+```
+
+## Q2
+
+```{r}
+fib = function(num){
+  if (num==0) {
+    return (0)
+  }
+  else if (num == 1){
+    return (c(0,1))
+  }
+  else{
+    result = c(0,1)
+    for (i in 3:(num+1)){
+      temp = result[i-2] + result[i-1]
+      result = c(result,temp)
+    }
+    
+  }
+  result
+}
+```
+
+```{r}
+fib(0)
+fib(1)
+fib(2)
+fib(3)
+fib(10)
+```
+
+
+```{r}
+fib_while = function(num){
+  if (num==0) {
+    return (0)
+  }
+  else if (num == 1){
+    return (c(0,1))
+  }
+  else{
+    result = c(0,1)
+    i = 3
+    while (i <= num+1){
+      temp = result[i-2] + result[i-1]
+      result = c(result,temp)
+      i=i+1
+    }
+    
+  }
+  result
+}
+```
+
+```{r}
+fib_while(0)
+fib_while(1)
+fib_while(2)
+fib_while(3)
+fib_while(10)
+```
+
+```{r}
+fib_repeat = function(num){
+  if (length(num)>1 | num < 0 | is.infinite(num)){
+    stop('invalid')
+  }
+  
+  if (num==0) {
+    return (0)
+  }
+  else if (num == 1){
+    return (c(0,1))
+  }
+  else{
+    result = c(0,1)
+    i=3
+    repeat{
+      if (i > num+1) {
+        break
+      }
+      temp = result[i-2] + result[i-1]
+      result = c(result,temp)
+      i=i+1
+    }
+    
+  }
+  result
+}
+```
+
+
+```{r}
+fib_repeat(0)
+fib_repeat(1)
+fib_repeat(2)
+fib_repeat(3)
+fib_repeat(10)
+```
+
+```{r}
+f_n = function(num){
+  n = 0:num
+  sim = (1 + sqrt(5))/2
+  
+    result = sim^n/sqrt(5)
+
+  round(result)
+}
+
+```
+
+
+```{r}
+f_n(0)
+f_n(1)
+f_n(2)
+f_n(3)
+f_n(10)
+```
+
+
+
