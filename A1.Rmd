@@ -55,10 +55,6 @@ paste(LETTERS[7:1],7:1,'-',letters[1:7],1:7,sep = '')
 ```{r}
 ## define f here
 f = function (x) {
-  # max index is the length for the longest one
-  index_s = 0
-  index_e = 0
-  max = 0
   
   # we also need to return the empty and 
   # length 1's situation 
@@ -68,57 +64,35 @@ f = function (x) {
   
   
   # this is the normal part
-  for (i in (1:(length(x)-1))){
+  # get the a's next minu the before one
+  a = which(diff(x) >= 0)
+  if (length(a)==0){
+    return(x)
+  }
+  
+  # special case
+  if (length(a)==1){
+    # we need the head and last
+    a = c(0,a,length(x))
     
-    # if we have find the part
-    # for we assume that the length of the partition will be >= 2
-    if(x[i]>x[i+1]){
-      start = i
-      end = i+1
-      len = 2
-      
-      # if we have reached the end of the x, we just out
-      if (i==length(x)-1){
-        if(max<len){
-          max = len
-          index_s = start
-          index_e = end
-        }
-        break
-      }
-      
-      # if we have not, we should go down
-      for (j in (i+1):(length(x)-1)){
-        if(x[j]>x[j+1]){
-          len = len+1
-          end = j+1
-        }
-        # there is no decreasing 
-        else{
-          break
-        }
-      }
-      
-      # if we have found new one, we should update the index and the max value
-      if (max<len){
-        max = len
-        index_s = start
-        index_e = end
-      }
-      else{
-        start = 0
-        end = 0
-      }
-    
+  }else{
+    if (x[length(x)] < x[length(x) - 1]) {
+      a = c(a, length(x))
     }
   }
   
-  if(index_s == index_e){
-    return (numeric(0))
+  # if the diff is 1 , then there is no elements between them
+  check = (diff(a) [which.max(diff(a))] == 1)
+  if (check){
+    return(numeric(0))
   }
-  
-  x[index_s:index_e]
+  start_index = which.max(diff(a))
+  end_index = start_index + 1
+  # plus 1 for the we put next to min the before one
+  x[(a[start_index] + 1):a[end_index]]
 }
+
+
 ```
 
 ```{r}
@@ -192,13 +166,13 @@ close
 ### e)
 
 ```{r}
-# if we want the at least 100,000 drivers
+# if we want the at least 1,000,000 drivers
 # we need to change get the drivers' items
 
-over_drivers_index = which((drivers / 10)>=1)
+over_drivers_index = which((drivers / 100)>=1)
 
 # then we calculate the highest fatality rates
-fatality_rate_per = deaths[over_drivers_index] / (drivers*100000)[over_drivers_index]
+fatality_rate_per = deaths[over_drivers_index] / (drivers*1000000)[over_drivers_index]
 
 # then we get 3 the highest rates
 state[over_drivers_index][order(fatality_rate_per)][1:3]
@@ -213,31 +187,101 @@ state[over_drivers_index][order(fatality_rate_per)][1:3]
 
 ```{r}
 # for we only need the first 7 terms of the series
+
+# in order to get the more accurate result we do not use vector numbers for the denominator
+
 # our arctan function will be 
-arctan = function(x) {
-  num = 2*seq(1,7)-1
-  arctan = 
+arctan_7 = function(x) {
+  arct = x - (x^3)/3 + (x^5)/5 - (x^7)/7 + (x^9)/9 - (x^11)/11 + (x^13)/13
+  arct
 }
+
+
+# then we get the value for pi
+4*arctan_7(1)
+# and the pi in R
+pi
+
+# difference
+diff = abs(4*arctan_7(1) - pi)
+diff
 ```
+
+Clearly this is not a good approximation. The difference between our result and 'pi' which is constant in R is 0.1421458 which is big.
+
 
 ### b)
 
 ```{r}
 ## define f here
 
+f = function(n) {
+  if(n == 1){
+    return (1)
+  }
+  
+  num = (2*seq(1,n)-1)
+  # we use 4*arctan(1) = pi
+  # so the x value is 1
+  arctan = as.double(sum((c(1,-1) * 1^num) / (num))) 
+  # return value
+  4*arctan
+}
 # f(1000)
+f(1000)
 ```
 
 ### c)
 
 ```{r}
 ## define approx here
-
+approx = function(eps){
+  # we create a Enough number to be the start precision
+  result = as.double('Inf')
+  # we start from n is 1
+  current = 1
+  
+  # use app to store all the result
+  app = result
+  
+  # we also need a flag 
+  # if we have it to be TRUE 
+  # means we have in the dead loop
+  flag = 0
+  
+  # we want to compare the result_i with the result_(i-1) 
+  # if their difference is lower than the eps 
+  # we consider that we get the right approximate for the  value 'pi'
+  while (result > eps) {
+    if (current == 1){
+      current = current + 1
+      next
+    }
+    
+    
+    app_i = f(current)
+    app_i_before =  f(current-1)
+    result = abs (app_i - app_i_before)
+    
+    if (result %in% app){
+      break
+    }
+    
+    app = c(app,result)
+    current = current + 1
+    
+  }
+  c(app[current-1],current-1)
+  
+}
 ```
 (explain here or in comments)
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # approx(0.00001)
+
+# use this for we have no same length in the f function
+approx(0.00001)
 ```
 
 ### d)
@@ -245,18 +289,44 @@ arctan = function(x) {
 ```{r}
 ## define sr here
 
+sr = function(n){
+  part1 = 2*sqrt(2) / 9801
+  i = 0:n
+  part2 = cumsum(
+    (factorial(4*i) * (1103 + 26390*i)) / ((factorial(i)^4) * 396^(4*i))
+  )
+  
+  part1 * part2
+  
+}
+
 # sr(n = 4)
+sr(n=4)
 # compare and explain
+# then our pi will be
+result = sr(n=4)
+our_pi = 1 / (sr(n=4))
+
+abs(our_pi-pi)
 ```
+
+From the result, we could know that we get a very good approximation of pi value. Our accuracy has exceeded the range we can express which is that we have the '0.000000e+00' in our difference result. 
 
 ### e)
 
 ```{r}
+# we just need to compose the n = 20
+our_pi_new = 1/(sr(20))
 
+abs(our_pi_new-pi)
 ```
+
+From the result, we could see that our absolute value of difference can not be small (We cannot express it as a smaller number). So 16 decimal digits is that we can expect to be correct
 
 ### f)
 
 ```{r}
-
+sr(50)
 ```
+
+This 'NaN' is cause by 
