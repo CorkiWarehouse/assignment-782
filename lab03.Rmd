@@ -1,0 +1,148 @@
+---
+title: "lab03"
+author: "Junyi Yang"
+date: "2023-03-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Q1
+
+```{r}
+m = matrix(1:9, 3)
+```
+
+```{r}
+m[2, 3]
+```
+
+```{r}
+# this code will delete the second line and the first col
+m[-2,-1]
+```
+
+```{r}
+m[2:6]
+```
+
+```{r}
+# will be m[3,3],m[3,2]
+# and m[2,3] and m[2,2]
+# the nmake it to a matrix
+m[3:2,3:2]
+```
+
+```{r}
+# bind the matix with 10 
+# use the row bind
+rbind(10, m)
+```
+
+```{r}
+# calculate the sum for each col
+colSums(m)
+```
+
+```{r}
+# rep 2:4 to add to each col
+# like 2,3,4,2,3,4,2,3,4
+m + 2:4
+```
+
+```{r}
+# repeat for each 
+# like 2,2,2,3,3,3,4,4,4
+m + rep(2:4, each=3)
+
+```
+
+```{r}
+ m[row(m) < col(m)]
+```
+
+## Q2
+
+```{r}
+set.seed(782)
+
+(x = runif(5))     # a uniform random sample
+
+mean(x)            # mean
+
+sd(x)              # standard deviation
+
+(z = (x - mean(x)) / sd(x)) # standardised sample
+
+mean(z)            # why not exactly zero?
+
+round(mean(z), 10) # now exactly zero
+
+sd(z)
+```
+
+#### Why not Zero?
+
+1. For we use some close value to get the x - mean(x) value, we will have some lack of precision. So the result mean is not zero.
+
+2. And we have the small sample size, this may cause the result to have some difference as we expected.
+
+
+
+```{r}
+set.seed(782)
+m = matrix(runif(15), nrow=5)
+colnames(m) = paste0("X", 1:ncol(m))
+
+m
+```
+
+### 1) Write R code using for loop (not apply and friends yet) which standardises each column of m and creates a resulting matrix z. You can start with z = m and then modify the columns.
+
+```{r}
+z = m
+# we need to do the standardises for each cols
+for (j in 1:ncol(z)) {
+  mean = mean(z[,j])
+  sd = sd(z[,j])
+  sd_z = (z[,j] - mean) / sd
+  z[,j] = sd_z
+  print(round(mean(z[,j]), 10))
+  print(sd(z[,j]))
+}
+z
+```
+
+The result seams great!
+
+### 2)Use apply() to find all the column means and standard deviations of m, and save them in variables mu and sig, respectively. Apply the same to the standardised z computed above to verify that it is correct without storing the result.
+
+```{r}
+# we need to init the z
+z = m
+
+# colmeas
+mu = apply(z,2,mean)
+mu
+
+# stadard deviations
+sig = apply(z,2,sd)
+sig
+
+# check 
+for (j in 1:ncol(z)) {
+  mean = mean(z[,j])
+  print(mean)
+  sd = sd(z[,j])
+  print(sd)
+}
+```
+
+```{r}
+# standard 
+
+
+```
+
