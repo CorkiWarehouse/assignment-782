@@ -1,0 +1,137 @@
+---
+title: "Lab04"
+author: "Junyi Yang"
+date: "2023-03-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Q1:
+
+### (1):
+
+```{r}
+# first we get the rnorm values for N(4,4)
+values = rnorm(1000,4,4)
+```
+
+```{r}
+# then we hist it 
+breaks = seq(floor(min(values)),ceiling(max(values)))
+hist(values,breaks = breaks)
+```
+
+also we can use the numbers to do the break
+```{r}
+hist(values,breaks = 50)
+```
+
+### (2)
+
+At this time we need the density plot in the hist function
+
+```{r}
+hist(values,breaks = breaks,freq = F)
+
+# then we need to draw a line for this plot 
+x =  seq(floor(min(values)),ceiling(max(values)),length = 1000)
+
+
+# x is the acutual value for our values
+# and the dnorm will return the density for this x 
+# if it is a part for the norm(4,4)
+lines(x,dnorm(x,4,4),col = 'red')
+```
+
+### (3)
+
+At this question, we need to create the sample with 300 and 700 at the same time, so our result will be  
+
+```{r}
+# we can use the vector to handle this problem
+# the first value means that we need 1000 result 
+# then the next is that we need the mean =0 and 4
+# to repeat for 300 times and 700 times 
+# then the next is that we need sd =1 and 4 to 
+# repeat 300 and 700 times 
+# so we have them in one line 
+values2 = rnorm(1000, rep(c(0,4),c(300,700)),rep(c(1,4),c(300,700)))
+```
+
+
+```{r}
+# then we hist it 
+# do not forget that we need dendity now 
+hist(values2, breaks = 50,freq = F)
+
+# then we need to draw the lines on it 
+# at first we need the x values for this lines
+x = seq(min(values2)-1,max(values2)+1,length.out = 1000)
+
+# then we draw the graph
+lines(x,dnorm(x,0,1)*0.3+dnorm(x,4,4)*0.7,col='red')
+```
+
+## Q2:
+
+### (1)
+
+#### 1e120 * 2e220 / 3e300
+
+This is because the we have the overflow for the up. We do not have the overflow for the bottom but we have the overflow for the upside value. So we need the log to make sure that we will have the right answer.
+
+```{r}
+# at first we need to change this to log 
+up = log(1e120) + log(2e220)
+down = log(3e300)
+
+# then we need to exp it back
+(result = exp(up-down))
+```
+So we have the correct result 
+
+
+
+#### log(1 + 1e-20)   # check function log1p()
+
+This is because we have the cancellation error. 1 and 1e-20 have a very big difference. So we will lose the correctness when one big value do the calculation with a very tiny one.
+
+We also need to use other log function
+
+```{r}
+# we just need to use the log1p()
+# it is log(1+x) x is 
+# the inside value will be the plus item
+log1p(1e-20)
+```
+
+#### exp(1e-20) - 1      # check function expm1()
+
+Same as the up we need to use the expm1()
+
+```{r}
+# this can be seen as exp(x) - 1
+# and x will be the inside value
+expm1(1e-20)
+```
+
+#### 1 - pnorm(10)    # check argument 'lower.tail'
+
+Same as up
+
+```{r}
+# this will be the same
+pnorm(10,lower.tail = F)
+```
+
+#### log(dnorm(50))
+
+we can use the inside function to handle this problem
+
+```{r}
+dnorm(50,log = T)
+```
+
