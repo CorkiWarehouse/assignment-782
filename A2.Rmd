@@ -1,0 +1,36 @@
+## Question 3
+
+### a)
+
+```{r}
+flag = 0
+```
+
+
+```{r error=TRUE}
+while (!flag){
+  k = 1
+  h = matrix(ncol = k,nrow = k)
+  for (i in 1:k){
+    for (j in 1:k){
+      h[i,j] = (i+j-1)^(-1)
+    }
+  }
+  
+  e_1 = rep(0,k)
+  e_1[1] = 1
+  
+  tryCatch({
+    # code that might produce an error
+    result <- solve(h,e_1)
+  }, error = function(e) {
+    # code to handle the error
+    stop("This chunk has an error!")
+    print(result)
+    flag = 1
+  })
+  
+  if (flag) {break}
+  k = k+1
+}
+```
