@@ -1,36 +1,502 @@
-## Question 3
+---
+title: "STATS 782 Assignment 2; University of Auckland"
+date: 'Due Date: 10:00 NZ Time, Monday 3 April 2023'
+output:
+  html_document: default
+  pdf_document: default
+---
 
-### a)
+### "Student name", "UPI"
+
+I have read the declaration on the cover sheet and confirm my agreement with it.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE) ## makes sure the code is shown
+```
+
+## Question 1
+
+### (a) : Compute a matrix m of the average number of accidents per day by year and limit.
 
 ```{r}
-flag = 0
+library(MASS)
+head(Traffic)
+```
+
+The result seams to be the same as we want in the assignment 
+
+Then we do the average for the value :
+
+```{r}
+# just for being convenient 
+traffic = Traffic
+
+# at first we need to create the mean matrix
+m_init = aggregate(y ~ year+limit, traffic, mean)
+
+# then we use xtabs function to do this job 
+m = as.matrix(xtabs(y~year+limit,data = m_init))
+m
 ```
 
 
-```{r error=TRUE}
-while (!flag){
-  k = 1
-  h = matrix(ncol = k,nrow = k)
-  for (i in 1:k){
+
+### (b) Use apply() and sweep() to fit following four models to the data yij from (a) using corresponding means as the parameter estimates:
+
+#### 1) y_ij = mu + r_ij
+
+This means that we only use the mean of the whole part **mu** and the residual **r_ij** for the whole part to estimate each y_ij value: 
+
+```{r}
+# so our model's coefficients for the mu will be 
+mu = mean(m)
+mu
+
+# then our residual will be 
+r = m - mu 
+r
+```
+
+
+
+#### 2) y_ij = mu + alpha_i + r_ij
+
+To do this estimate, our estimated y_ij will be formed from (the whole data mean **mu** + the effect common to all the values in the i-th row **alpha_i** + residual **r_ij**). So this will be :
+
+```{r}
+# the whole mean
+mu = mean(m)
+mu
+
+# then we subtract the mu from our original matrix
+r = m - mu
+
+# at first we need the alpha from the matrix r
+alpha = apply(r, 1, mean)
+alpha
+
+# then we use the sweep to get the remain
+# to represent the residual
+r = sweep(r,1,alpha)
+r
+```
+
+#### 3) y_ij = mu + beta_j + r_ij
+
+For this model, our estimated y_ij will be formed from (the whole data mean **mu** + the effect common to all the values in the j-th column **beta_i** + residual **r_ij**). So our coefficients and residuals will be :
+
+```{r}
+#  again the whole mean
+mu = mean(m)
+mu
+
+# then we subtract the mu from our original matrix
+r = m - mu
+
+# at first we need the beta from the matrix r
+beta = apply(r, 2, mean)
+beta
+
+# then we use the sweep to get the remain
+# to represent the residual
+r = sweep(r,2,beta)
+r
+```
+
+#### 4) y_ij = mu + alpha_i + beta_j + r_ij
+
+For this model, our estimated y_ij will be formed from (the whole data mean **mu** + the effect common to all the values in the i-th row **alpha_i** + the effect common to all the values in the j-th column **beta_i** + residual **r_ij**). So our coefficients and residuals will be :
+
+```{r}
+# again the whole mean
+mu = mean(m)
+mu
+
+# then we subtract the mu from our original matrix
+r = m - mu
+
+# at first we need the alpha from the matrix r
+alpha = apply(r, 1, mean)
+alpha
+
+# then we use the sweep to get the remain
+# to represent the residual
+r = sweep(r,1,alpha)
+
+# then we get the beta from the rest matrix r
+beta = apply(r,2,mean)
+beta
+
+# at the end, we subtract the beta part to get the residual
+r = sweep(r,2,beta)
+r
+
+```
+
+
+## Question 2
+
+### (a) First, we want to see if there are any issues in the data. Count the number of days within the covered range for which there are no data records.
+
+In order to complete this task, we need to read in the data first.
+
+```{r}
+# we have put the file in the same fold for this Rmd file
+# so we can read in the data directly 
+rainfall = read.csv("akl-rainfall.csv")
+
+# convert date from character vector to Date
+rainfall$date = as.Date(rainfall$date)
+# check that if we have read the data well
+tail(rainfall, 3)
+```
+
+The result seams good. We can continue to do the following steps.
+
+Then we should count the number of days within the covered range for which there are no data records.
+
+```{r}
+# at first we should check if there are some NA value in our recording
+which(is.na(rainfall$amount))
+which(is.na(rainfall$date))
+```
+
+Seams that we do not have the NA value. So the no data records will be the data with date jumping from next to the next next.
+
+```{r}
+# we just need to find the diff for the date more than 1 will be the result
+num_no = sum(diff(rainfall$date)-1)
+num_no
+```
+
+So the number of days within the covered range for which there are no data records will be `r num_no`
+
+### (b) There are apparently missing data. Find all years that had at least 360 records and create a new data frame rainfall2 with records only from those years.
+
+So at first, we need to find the Eligible year row 
+
+```{r}
+# at first we need to get all the year information 
+(sub_year = unique(substr(rainfall$date,1,4)))
+
+# we also need the original one 
+original_year = substr(rainfall$date,1,4)
+
+# then we get the year records more than 360
+count = function(year){
+  if (sum(year == original_year)>360){
+    return (T)
+  }
+  F
+}
+```
+
+Then we select the year:
+
+```{r}
+# then we get the year which we  want 
+result = sapply(sub_year, count)
+
+# and we change it to year 
+want_year = names(result)[which(result==T)]
+want_year
+```
+
+The we make the new data frame rainfall2:
+
+```{r}
+# make the new data frame
+rainfall2 = rainfall[which(original_year %in% want_year),]
+# check ifwe have done well
+head(rainfall2)
+```
+
+
+### (c) In all following questions let us use the data rainfall2 from above without incomplete years. What is the average total precipitation per year?
+
+```{r}
+# at first we need to get the year from new data frame
+years = substr(rainfall2$date,1,4)
+
+# then we get the unique years
+uni_years = unique(years)
+
+# we need to find the total precipitation per year at first
+total_year = function(year){
+  sum(rainfall2$amount[which(years == year)])
+}
+
+# the total value will be 
+total = sapply(uni_years, total_year)
+total
+```
+
+The we get the average total precipitation per year:
+
+```{r}
+mean(total)
+```
+
+So the average total precipitation per year will be `r mean(total)`
+
+
+### (d) On average, how many days per year are there with at least some precipitation?
+
+If we want the days with at least some precipitation, we should at first get the number of the amount is not 0.0
+
+```{r}
+# at first we should check for every year
+at_least_check = function(year){
+  sum(
+     rainfall2$amount[which(years == year)] > 0
+    ) 
+}
+
+# then we see the amount for the years
+at_least_result = sapply(uni_years, at_least_check)
+at_least_result
+
+# then we check the mean days for all the year
+mean(at_least_result)
+```
+
+### (e)
+
+To achieve this goal, we need to consider the range for our interval.
+
+```{r}
+# we just need the int value for the amount 
+# the min amount
+(amount_min = floor(min(rainfall2$amount)))
+# and the max amount 
+(amount_max = floor(max(rainfall2$amount)))
+
+# then we create the rang value 
+(sequence = amount_min : amount_max)
+```
+
+The next step is to create the function to create the sequence for all the amount.
+
+```{r}
+# we should not consider the 0 amount value in our data
+amount_seq = function(amount_s){
+  sum(
+    rainfall2$amount[which(rainfall2$amount !=0)]< (amount_s+1) & rainfall2$amount[which(rainfall2$amount !=0)]>= (amount_s)
+  ) 
+}
+
+
+result_rainfall2 = sapply(sequence, amount_seq)
+result_rainfall2
+```
+
+Then we should make the frequency table 
+
+```{r}
+# we need to fit each value
+names(result_rainfall2) = paste('[',sequence,',',sequence+1,')',sep ='')
+
+result_rainfall2
+```
+
+The we should plot the result 
+```{r}
+# for we have broken the amount in every one unit
+# we just need to give the breaks, 
+# the result will be what we want
+breaks_hist = seq(floor(min(sequence)),ceiling(max(sequence)+1))
+hist(rainfall2$amount[which(rainfall2$amount>0)]
+     ,breaks = breaks_hist,right = F,xlab = 'rainfall_amount')
+```
+
+
+
+### (f) 
+
+At first, we need to remove the days without precipitation
+
+```{r}
+rainfall3 = rainfall2[which(rainfall2$amount != 0),]
+head(rainfall3)
+
+# check if there are some zero value 
+which(rainfall3$amount==0)
+```
+
+Then we should to find out the optimal result for $\alpha$ and $\beta$
+
+```{r}
+# at first we shoule craete the function to make it 
+log_lik <- function(par, x) {
+  alpha <- par[1]
+  beta <- par[2]
+  sum(dgamma(x, shape=alpha, rate=beta, log=TRUE))
+}
+
+# we take the control just incase there will be some negative 
+fit <- optim(c(1, 1), log_lik, x=rainfall3$amount, method="BFGS",control = list(fnscale=-1))
+```
+
+let check from the result :
+
+```{r}
+fit 
+```
+
+From the result, we could see that we have reached the convergence. So our result is OK. And for we have some warning message, we need to change our starting point to be the better result.
+
+So our final optim will be :
+```{r}
+fit <- optim(c(0.63, 0.1),log_lik, x=rainfall3$amount, method="BFGS",control = list(fnscale=-1))
+```
+
+Let's check fit again to see if we have meet the convergence.
+
+```{r}
+fit
+```
+
+
+The result is good. So the maximum likelihood estimates will be :
+
+For alpha:
+$$\widehat{\alpha} = 0.6318549$$
+
+For beta:
+$$\widehat{\beta} = 0.1030970$$
+
+
+### (g) The estimated parameters from (f) are roughly ˆα = 0.63 and βˆ = 0.1. Plot the corresponding density function for the range (0, 50] as a line (you can use the more precise estimated values from (f) if you have them). Overlay the empirical distribution from the rainfall data over the density as red points. This is most easily done using the same approach as (e) and plotting the resulting scaled values in the middle of each interval.
+
+```{r}
+# in order to finish this job, we need to create the x first
+x = seq(0,50,length=1000)
+
+# then we do the plot 
+plot(x,dgamma(x,shape=0.63, rate=0.1),type = 'l',ylab = 'Density')
+
+# then we need to scale the data into 
+rainfall2_amount = rainfall2$amount[which(rainfall2$amount>0)]
+density_rain = rainfall2_amount[which(rainfall2_amount<50)]
+density_result = hist(density_rain,breaks = 0:50,right = F, plot = F)
+
+# then we get the density from the hist result
+density_point = density_result$density
+points(0.5:49.5,density_point,col = 'red',pch=20)
+
+```
+
+### (h) Assuming that our estimated parameters reflect the real distribution, what is the probability that if it rains, we will get more than 1 cm rainfall in Auckland on a given day?
+
+To get this answer's result, we need to do the pgamma() fucntion to get the result with the value that we got .
+
+```{r}
+pgamma(1,shape = 0.63,rate = 0.1 ) * 100
+```
+
+So the probability is about 25.15% that we will get more than 1 cm rainfall in Auckland on a given day
+
+### (i)  Typically, the rainfall may depend on the season. Compute and plot the 25%, 50% and 75% quartiles across years for the monthly rainfall from rainfall2 (including 0 values). Interpret the plot.
+
+We need to find the monthly rainfall from rainfall2 at first  
+
+```{r}
+# at first we need to get the month value for all the data
+months = substr(rainfall2$date,6,7)
+
+# then we find all kinds of months 
+unique_months = unique(months)
+
+# we let int_months be the int for the month value 
+int_months = as.integer(unique(months))
+```
+
+Then we need the 25%, 50% and 75% quartiles for each month 
+
+```{r}
+# at first we need a function to do the all month
+calculate_fun = function(month){
+  sum(
+    rainfall2$amount[which(months == month)]
+  )
+}
+
+all_amount_month = sapply(unique_months,calculate_fun)
+all_amount_month
+
+# then we have the quartiles as a vector 
+month_amount_qu = rep(c(0.25,0.5,0.75),each=length(all_amount_month))*all_amount_month
+month_amount_qu
+```
+
+Then we need to plot on the graph:
+
+```{r}
+plot(rep(1:12,each=3),month_amount_qu,xlab = 'month',ylab = 'rain_amount')
+```
+
+
+### (j)
+
+```{r}
+
+```
+
+## k)
+
+```{r}
+
+```
+
+## Question 3
+
+### (a) Solve the above using the solve() function for values k = 1, 2, . . . until it is no longer possible. What is the largest value of k you can solve this problem for?
+
+At first, we need to create the Hilbert matrix:
+
+```{r}
+hilbert_m_solve = function(k){
+  h = matrix(nrow=k,ncol=k)
+  for (i in 1:k) {
     for (j in 1:k){
       h[i,j] = (i+j-1)^(-1)
     }
   }
-  
   e_1 = rep(0,k)
   e_1[1] = 1
   
+  solve(h,e_1)
+}
+```
+
+Then we should get the solve part :
+
+```{r error=TRUE}
+k = 1
+while(T) {
   tryCatch({
     # code that might produce an error
-    result <- solve(h,e_1)
+    result <- hilbert_m_solve(k)
   }, error = function(e) {
     # code to handle the error
     stop("This chunk has an error!")
-    print(result)
-    flag = 1
+    break
   })
+  k = k + 1 
   
-  if (flag) {break}
-  k = k+1
 }
+```
+
+Then we check what our k is :
+
+```{r}
+k
+```
+
+So the largest value of k that can solve this problem for is `r k`.
+
+### b)
+
+```{r}
+
 ```
