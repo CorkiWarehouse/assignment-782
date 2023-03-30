@@ -207,7 +207,7 @@ The we make the new data frame rainfall2:
 ```{r}
 # make the new data frame
 rainfall2 = rainfall[which(original_year %in% want_year),]
-# check ifwe have done well
+# check if we have done well
 head(rainfall2)
 ```
 
@@ -432,15 +432,44 @@ month_amount_qu
 Then we need to plot on the graph:
 
 ```{r}
-plot(rep(1:12,each=3),month_amount_qu,xlab = 'month',ylab = 'rain_amount')
+plot(rep(1:12,3),month_amount_qu,xlab = 'month',ylab = 'rain_amount')
 ```
 
+Interpret:
 
-### (j)
+1. From this plot, we could see that for the seasons, we will have that the smallest sum amount of the rain amount will be in the winter (month 12-2). And the biggest one will be in the summer (month 6-8).
+
+2. Through the whole year, we could see that the total amount of the rain through the whole year will be like the total amount will increase from winter to summer(which we will have the biggest amount for the whole year), then there is a decreasing trend from summer to winter(which we will have the minimum amount value for the whole year).
+
+### (j) Apparently the rainfall amount changes throughout the year, so we sholdt our model from (f) separately for each month. Estimate the parameters ^a and ^b independently for each month using the same method as (f) and print the result - it should be a 2 x 12 matrix named pars.
+
+To finish this task, we need to apply the optim function for each months 
 
 ```{r}
+# we create a fucntion to do this task
+month_fun = function(month){
+  # we also need to make sure that the input value must be larger than 0
+  input = rainfall2$amount[which(month == months)]
+  input = input[input>0]
+  
+  fit <- optim(c(1, 1), log_lik, x=input, method="BFGS",control = list(fnscale=-1))
+  
+  fit$par
+}
+
+
+
+# then we apply this function for each months
+whole_month_result = sapply(unique_months,month_fun)
 
 ```
+Then we let's see the result 
+
+```{r}
+as.matrix(whole_month_result,rownames(c('alpha','beta')))
+```
+
+
 
 ## k)
 
