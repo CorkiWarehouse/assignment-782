@@ -6,7 +6,7 @@ output:
   pdf_document: default
 ---
 
-### "Student name", "UPI"
+### "Junyi Yang", "223831196"
 
 I have read the declaration on the cover sheet and confirm my agreement with it.
 
@@ -333,8 +333,10 @@ log_lik <- function(par, x) {
   sum(dgamma(x, shape=alpha, rate=beta, log=TRUE))
 }
 
-# we take the control just incase there will be some negative 
-fit <- optim(c(1, 1), log_lik, x=rainfall3$amount, method="BFGS",control = list(fnscale=-1))
+# we take the control just increase there will be some negative
+# for we do not know which is a good start 
+# we will not choose BFGS method at first 
+fit <- optim(c(1, 1), log_lik, x=rainfall3$amount, control = list(fnscale=-1))
 ```
 
 let check from the result :
@@ -452,11 +454,12 @@ month_fun = function(month){
   input = rainfall2$amount[which(month == months)]
   input = input[input>0]
   
-  fit <- optim(c(1, 1), log_lik, x=input, method="BFGS",control = list(fnscale=-1))
+  # for we do not know the start point 
+  # so we do 
+  fit <- optim(c(1, 1), log_lik, x=input,control = list(fnscale=-1))
   
   fit$par
 }
-
 
 
 # then we apply this function for each months
@@ -466,16 +469,30 @@ whole_month_result = sapply(unique_months,month_fun)
 Then we let's see the result 
 
 ```{r}
-as.matrix(whole_month_result,rownames(c('alpha','beta')))
+estimated_m = as.matrix(whole_month_result,rownames(c('alpha','beta')))
+estimated_m
 ```
 
 
 
-## k)
+### (k) Now that we have estimates for each month, compute the probabilities of seeing at least 1 cm of rain in Auckland on a given day (if it rains) for each month of the year.
+
+To achieve this goal, we just need to compute the pgamma function for each par of parameters.
 
 ```{r}
+# at first we need a function 
+month_gamma_fun = function (month){
+  pgamma(1,shape = estimated_m[1,month],rate = estimated_m[2,month] ) * 100
+}
+
+# then we use the sapply for each month 
+sapply(1:12,month_gamma_fun)
 
 ```
+
+So the probabilities of seeing at least
+1 cm of rain in Auckland on a given day (if it rains) for each month of the year will be about (from month 1 to 12) : 27.97% 26.21% 26.01% 27.48% 25.96% 24.61% 22.61% 23.38% 25.20% 26.29% 26.82% 25.42% .
+
 
 ## Question 3
 
@@ -524,8 +541,53 @@ k
 
 So the largest value of k that can solve this problem for is `r k`.
 
-### b)
+### (b) A Cholesky decomposition of a symmetric positive-definite square matrix A is a decomposition of the form
 
-```{r}
+```{r error=TRUE}
+# at first we need to give the function 
+cholsesky_m_solve = function(k){
+  h = matrix(nrow=k,ncol=k)
+  for (i in 1:k) {
+    for (j in 1:k){
+      h[i,j] = (i+j-1)^(-1)
+    }
+  }
+  e_1 = rep(0,k)
+  e_1[1] = 1
+  
+  # then we need a upper triangular matrix
+  m = chol(h)
+  
+  y = forwardsolve(t(m),e_1)
+  backsolve(m,y)
+}
+
 
 ```
+
+Then we need to find out the k
+
+```{r error=TRUE}
+# first try will be 5
+k = 5
+while(T) {
+  tryCatch({
+    # code that might produce an error
+    result <- cholsesky_m_solve(k)
+  }, error = function(e) {
+    # code to handle the error
+    stop("This chunk has an error!")
+    break
+  })
+  k = k + 1 
+  
+}
+```
+
+let's check the k result 
+
+```{r}
+k
+```
+
+So the highest for k will be 13.
