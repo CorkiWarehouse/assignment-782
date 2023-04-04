@@ -36,3 +36,77 @@ index = which(nchar(lines)<39)
 ```
 
 
+---
+title: "try"
+output: html_document
+date: "2023-04-04"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 2 :
+
+first we should read the data in 
+
+```{r}
+hu = read.table("hurricanes.txt",sep = ',')
+```
+
+```{r}
+# 1-1-2010 will be 20100101
+hu_sub = hu[hu$V3>=20100000,]
+
+```
+
+## 3: 
+
+we should not count the same record twice
+
+```{r}
+length(unique(hu_sub[hu_sub$V6 == 'HU',]$V1))
+```
+
+## 4:
+
+```{r}
+plot(hu_sub$V9~hu_sub$V10)
+```
+
+it looks that there is some relationship
+
+```{r}
+fit = lm(V9~V10,data = hu_sub)
+
+fit 
+```
+plot on the graph
+
+```{r}
+plot(hu_sub$V9~hu_sub$V10)
+x = seq(min(hu_sub$V10),max(hu_sub$V10),length = 1000)
+lines(x,fit$coefficients[2] * x + fit$coefficients[1], col = 'red')
+```
+
+
+## 5: 
+
+```{r}
+SW_convert = function(value){
+  index_w = which(substr(hu_sub$V8,nchar(hu_sub$V8),nchar(hu_sub$V8)) == 'W')
+  
+  index_s = which(substr(hu_sub$V8,nchar(hu_sub$V8),nchar(hu_sub$V8)) == 'S')
+  
+  
+}
+```
+
+
+
+
+
+
+
+
+
